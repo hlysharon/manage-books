@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+        .grid {
+            margin: auto;
+            width: 530px;
+            text-align: center;
+        }
+        
+        .grid table {
+            border-top: 1px solid #C2D89A;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .grid th,
+        td {
+            padding: 10;
+            border: 1px dashed #F3DCAB;
+            height: 35px;
+            line-height: 35px;
+        }
+        
+        .grid th {
+            background-color: #F3DCAB;
+        }
+        
+        .grid .book {
+            padding-bottom: 10px;
+            padding-top: 5px;
+            background-color: #F3DCAB;
+        }
+        
+        .grid .count {
+            height: 30px;
+            line-height: 30px;
+            background-color: #F3DCAB;
+            border-top: 1px solid #C2D89A;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="grid">
+            <div>
+                <h1>图书管理</h1>
+                <div class="book">
+                    <div>
+                        <label for="id">
+              编号：
+            </label>
+                        <input type="text" id="id" v-model='id' :disabled='isSubmit' v-focus>
+                        <label for="name">
+              名称：
+            </label>
+                        <input type="text" id="name" v-model='name'>
+                        <button @click='add' :disabled='isChanged'>提交</button>
+                    </div>
+                </div>
+            </div>
+            <div class="count">
+                总件数：{{count}}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>名称</th>
+                        <th>时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for='item in books' :key='item.id'>
+                        <td>{{item.id}}</td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.date | dateFormat('yyyy-mm-dd')}}</td>
+                        <td>
+                            <a href="" @click.prevent='mod(item.id)'>修改</a>
+                            <span>|</span>
+                            <a href="" @click.prevent='del(item.id)'>删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript">
+        // 处理日期
+        Vue.filter('dateFormat', function(val, arg) {
+                var d = new Date(val);
+                if (arg == 'yyyy-mm-dd') {
+                    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+                } else {
+                    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
+                }
+            })
+            // 自动获取焦点
+        Vue.directive('focus', {
+            inserted: function(el) {
+                el.focus();
+            }
+        })
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                books: [],
+                id: '',
+                name: '',
+                isSubmit: false,
+                isChanged: false
+            },
+            methods: {
+                // 添加
+                add() {
+                    if (this.sub) {
+                        this.books.some(item => {
+                            if (item.id == this.id) {
+                                item.name = this.name;
+                            }
+                        });
+                    } else {
+                        var obj = {
+                            id: this.id,
+                            name: this.name,
+                            date: 2525609975000
+                        };
+                        this.books.push(obj);
+                    }
+                    this.id = '';
+                    this.name = '';
+                },
+                // 删除
+                del(id) {
+                    //删除方法1
+                    var index = this.books.findIndex(item => item.id == id);
+                    this.books.splice(index, 1);
+                    //删除方法2
+                    this.books = this.books.filter(item => item.id != id)
+                },
+                // 修改
+                mod(id) {
+                    this.sub = true;
+                    var book = this.books.find(item => item.id == id);
+                    this.id = book.id;
+                    this.name = book.name;
+                }
+            },
+            // 统计
+            computed: {
+                count: function() {
+                    return this.books.length;
+                }
+            },
+            // 监听修改与否
+            watch: {
+                name: function(val) {
+                    this.isChanged = this.books.some(item => item.name == val);
+                }
+            },
+            // 模拟ajax请求数据及其渲染
+            mounted: function() {
+                var data = [{
+                    id: 1,
+                    name: '三国演义',
+                    date: 2525609975000
+                }, {
+                    id: 2,
+                    name: '水浒传',
+                    date: 2525609975000
+                }, {
+                    id: 3,
+                    name: '红楼梦',
+                    date: 2525609975000
+                }, {
+                    id: 4,
+                    name: '西游记',
+                    date: 2525609975000
+                }];
+                this.books = data;
+            }
+        });
+    </script>
+</body>
+
+</html>
